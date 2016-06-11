@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Bundle</title>
+		<!-- React -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.1/react.js"></script>
+	    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.1/react-dom.js"></script>
+	    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.16/browser.js"></script>
+	    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+	    <script src="https://cdnjs.cloudflare.com/ajax/libs/remarkable/1.6.2/remarkable.min.js"></script>
+	    <script type="text/javascript" src="app.js"></script>
+
+	    <!-- Bootstrap -->
+	    <!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+		<link rel="stylesheet" type="text/css" href="app.css">
+	</head>
+
+	<body>
+		<nav class="navbar navbar-default">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<h1 class="navbar-text">Bundle</h1>
+				</div>
+			</div>
+		</nav>
+
+		<main class="container">
+			<div class="row">
+				<div id="taskName" class="col-md-5">
+				</div>
+
+				<div id="timer" class="col-md-5 col-md-offset-2"></div>
+			</div>
+
+			<div class="row">
+				<div id="checkmarks" class="col-md-12">
+				</div>
+			</div>
+		</main>
+
+		<!-- Timer for 25 minutes -->
+		<script type="text/babel">
+			var Timer = React.createClass({
+				render: function() {
+					var minutes = Math.floor(this.props.elapsed/60);
+					var seconds = this.props.elapsed%60;
+
+					if (this.props.elapsed > 0) {
+						var message = "Get to work! You have " + minutes + ":" + seconds + " minutes remaining";
+					} else{
+						checkmark.count++;
+						checkmark.onBreak = true;
+					};
+
+					return React.DOM.h2(null, message);
+				}
+			});
+
+			var twentyFiveMinutes = 1500;
+            var TimerFactory = React.createFactory(Timer);
+
+            setInterval(function() {
+            	if(!checkmark.onBreak && (checkmark.count < 4)) {
+	            	ReactDOM.render(TimerFactory({
+	            			elapsed: twentyFiveMinutes
+	            		}), document.getElementById("timer")
+	            	);
+
+	            	twentyFiveMinutes -= 1;
+	            } else {
+	            	twentyFiveMinutes = 10;
+	            }
+            }, 1000);
+		</script>
+
+		<!-- Timer for 5 minute breaks -->
+		<script type="text/babel">
+			var BreakTimer = React.createClass({
+				render: function() {
+					var minutes = Math.floor(this.props.elapsed/60);
+					var seconds = this.props.elapsed%60;
+
+					if (this.props.elapsed > 0) {
+						var message = "Take a break! You have " + minutes + ":" + seconds + " minutes remaining";
+					} else{
+						checkmark.onBreak = false;
+					};
+
+					return React.DOM.h2(null, message);
+				}
+			});
+			var breakMinutes = 300;
+            var BreakFactory = React.createFactory(BreakTimer);
+
+			setInterval(function() {
+				if(checkmark.onBreak && (checkmark.count < 4)) {
+					ReactDOM.render(BreakFactory({
+							elapsed: breakMinutes
+						}), document.getElementById("timer")
+					);
+
+					breakMinutes -= 1;
+				} else {
+					breakMinutes = 5;
+				}
+			}, 1000);
+		</script>
+
+		<!-- Timer for longer break -->
+		<script type="text/babel">
+			var LongerBreak = React.createClass({
+				render: function() {
+					var minutes = Math.floor(this.props.elapsed/60);
+					var seconds = this.props.elapsed%60;
+
+					if (this.props.elapsed > 0) {
+						var message = "This is your last break. You have " + minutes + ":" + seconds + " minutes remaining";
+					} else{
+						alert("Timer is up. Ready to restart?");
+						location.reload();
+					};
+
+					return React.DOM.h2(null, message);
+				}
+			});
+
+			var longerBreakMinutes = 900;
+			var LongerBreakFactory = React.createFactory(LongerBreak);
+
+			setInterval(function() {
+				if (checkmark.count >= 4) {
+					ReactDOM.render(LongerBreakFactory({
+						elapsed: longerBreakMinutes
+					}), document.getElementById("timer"));
+
+					longerBreakMinutes -= 1;
+				};
+			}, 1000);
+		</script>
+
+		<!-- Checkmark display -->
+		<script type="text/babel">
+			var CheckMarkBox = React.createClass({
+				render: function() {
+					var marks = [];
+
+					for(var i = 0; i < checkmark.count; i++) {
+						marks.push(<h4 class='glyphicon glyphicon-ok' key={i}><p>Checkmark</p></h4>);
+					}
+
+					return (
+						<div>{marks}</div>
+					);
+				}
+			})
+			setInterval(function() {
+				if((checkmark.count > 0) && (checkmark.count <= 4)) {
+					ReactDOM.render(<CheckMarkBox />, document.getElementById("checkmarks"));
+				}
+			}, 1000);
+		</script>
+	</body>
+</html>
